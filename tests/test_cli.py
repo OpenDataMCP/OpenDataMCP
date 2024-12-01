@@ -23,26 +23,31 @@ def test_run_invalid_provider(runner):
 
 
 def test_list_providers(runner):
-    mock_modules = ["provider1", "provider2"]
-    with patch("pkgutil.iter_modules") as mock_iter_modules:
-        mock_iter_modules.return_value = [(None, name, False) for name in mock_modules]
+    mock_distributions = [
+        type("Distribution", (), {"metadata": {"Name": "odmcp_provider1"}}),
+        type("Distribution", (), {"metadata": {"Name": "odmcp_provider2"}}),
+    ]
+    with patch("importlib.metadata.distributions") as mock_dist:
+        mock_dist.return_value = mock_distributions
 
         result = runner.invoke(cli, ["list"])
 
         assert result.exit_code == 0
         assert "Available providers:" in result.output
-        for provider in mock_modules:
-            assert provider in result.output
+        assert "provider1" in result.output
+        assert "provider2" in result.output
 
 
 def test_list_no_providers(runner):
-    with patch("pkgutil.iter_modules") as mock_iter_modules:
-        mock_iter_modules.return_value = []
+    with patch("importlib.metadata.distributions") as mock_dist:
+        mock_dist.return_value = []  # No providers installed
 
         result = runner.invoke(cli, ["list"])
 
         assert result.exit_code == 0
         assert "No providers available" in result.output
+        assert "Install providers with:" in result.output
+        assert "uv pip install odmcp[provider_name]" in result.output
 
 
 def test_info_valid_provider(runner):

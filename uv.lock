@@ -205,6 +205,11 @@ dependencies = [
     { name = "mcp" },
 ]
 
+[package.optional-dependencies]
+ch-sbb = [
+    { name = "odmcp-ch-sbb" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "pre-commit" },
@@ -218,6 +223,7 @@ dev = [
 requires-dist = [
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "mcp", specifier = ">=1.0.0" },
+    { name = "odmcp-ch-sbb", marker = "extra == 'ch-sbb'", editable = "packages/odmcp_ch_sbb" },
 ]
 
 [package.metadata.requires-dev]
