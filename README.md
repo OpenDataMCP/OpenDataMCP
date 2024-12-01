@@ -1,6 +1,7 @@
 # Open Data Model Context Protocol
 
-![vc3598_A_typical_scene_of_natural_Switzerland_with_a_swiss_trai_867174fe-a627-4ea9-af22-5025026780a5](https://github.com/user-attachments/assets/7f105fa3-1db4-411b-aee4-448e268fc0a6)
+![vc3598_Hyper-realistic_Swiss_landscape_pristine_SBB_red_train_p_40803c2e-43f5-410e-89aa-f6bdcb4cd089](https://github.com/user-attachments/assets/80c823dd-0b26-4d06-98f9-5c6d7c9103de)
+
 
 [![PyPI version](https://badge.fury.io/py/odmcp.svg)](https://badge.fury.io/py/odmcp)
 [![CI](https://github.com/grll/OpenDataMCP/actions/workflows/ci.yml/badge.svg)](https://github.com/grll/OpenDataMCP/actions/workflows/ci.yml)
