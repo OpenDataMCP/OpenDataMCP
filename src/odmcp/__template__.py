@@ -121,6 +121,6 @@ TOOLS_HANDLERS["endpoint-name"] = handle_endpoint
 if __name__ == "__main__":
     import anyio
 
-    from utils import run_server
+    from odmcp.utils import run_server
 
     anyio.run(run_server, "service.name", TOOLS, TOOLS_HANDLERS)

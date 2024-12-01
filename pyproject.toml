@@ -13,6 +13,12 @@ dependencies = [
     "mcp>=1.0.0",
 ]
 
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+odmcp_ch_sbb = {workspace = true}
+
 [tool.hatch.version]
 path = "src/odmcp/__init__.py"
 
@@ -23,22 +29,18 @@ odmcp = "odmcp.cli:main"
 line-length = 88
 target-version = "py312"
 
-[tool.pyright]
-include = ["src/mcp", "tests"]
-venvPath = "."
-venv = ".venv"
-
 [dependency-groups]
 dev = [
     "pytest-asyncio>=0.24.0",
     "pytest>=8.3.3",
     "ruff>=0.8.1",
     "pre-commit>=4.0.1",
+    "pyright>=1.1.389",
 ]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
-testpaths = ["tests"]
+pythonpath = ["src", "packages/odmcp_ch_sbb/src"]
+testpaths = ["tests", "packages/*/tests"]
 addopts = "-ra -q"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
@@ -49,3 +51,8 @@ log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/odmcp"]
+
+[project.optional-dependencies]
+ch_sbb = [
+    "odmcp_ch_sbb"
+]

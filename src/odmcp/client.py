@@ -9,12 +9,17 @@ from mcp.client.stdio import stdio_client
 
 log = logging.getLogger(__name__)
 
-PROVIDER = "sbb"
+PROVIDER = "ch_sbb"
 
 # Create server parameters for stdio connection
 server_params = StdioServerParameters(
     command="uv",
-    args=["run", "odmcp", "run", PROVIDER],  # Optional command line arguments
+    args=[
+        "run",
+        "--package",
+        f"odmcp_{PROVIDER}",
+        f"packages/odmcp_{PROVIDER}/src/odmcp_ch_sbb.py",
+    ],  # Optional command line arguments
     env=None,  # Optional environment variables
 )
 
@@ -32,9 +37,10 @@ async def main():
             # # List available prompts
             # prompts = await session.list_prompts()
 
-            # # List available tools
-            # tools = await session.list_tools()
+            # List available tools
 
+            tools = await session.list_tools()
+            log.info(f"Tools: {tools}")
             # # Read a resource
             # resource = await session.read_resource("file://some/path")
 

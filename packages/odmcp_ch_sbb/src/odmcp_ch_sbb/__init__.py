@@ -159,7 +159,7 @@ TOOLS_HANDLERS["rail-traffic-info"] = handle_rail_traffic_info
 
 
 async def main():
-    from odmcp.providers.utils import create_mcp_server
+    from odmcp.utils import create_mcp_server
 
     # create the server
     server = create_mcp_server(

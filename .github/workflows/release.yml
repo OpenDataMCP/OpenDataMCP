@@ -33,7 +33,7 @@ jobs:
         run: |
           uv venv
           source .venv/bin/activate
-          uv sync --no-dev
+          uv sync --all-extras --no-dev
           uv build
 
       - name: Check version matches tag

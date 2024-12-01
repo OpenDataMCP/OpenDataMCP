@@ -34,19 +34,18 @@ def run(provider: str):
 def list():
     """List all available providers"""
     try:
-        import pkgutil
+        from importlib.metadata import distributions
 
-        import odmcp.providers as providers_pkg
-
-        # Get all modules in the providers package
+        # Find all installed packages starting with odmcp_
         providers = [
-            name
-            for finder, name, ispkg in pkgutil.iter_modules(providers_pkg.__path__)
-            if name not in ("__template__", "__init__", "utils")
+            dist.metadata["Name"].replace("odmcp_", "")
+            for dist in distributions()
+            if dist.metadata["Name"].startswith("odmcp_")
         ]
 
         if not providers:
-            click.echo("No providers available")
+            click.echo("No providers available. Install providers with:")
+            click.echo("uv pip install odmcp[provider_name]")
             return
 
         click.echo("Available providers:")
@@ -62,7 +61,7 @@ def list():
 def info(provider: str):
     """Show detailed information about a provider"""
     try:
-        module = importlib.import_module(f"odmcp.providers.{provider}")
+        module = importlib.import_module(f"odmcp_{provider}")
 
         click.echo(f"Provider: {provider}")
         if hasattr(module, "__doc__") and module.__doc__:

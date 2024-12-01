@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "odmcp_ch_sbb"
+dynamic = ["version"]
+description = "Python MCP servers exposing SBB Open Data to compatible LLM clients."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "odmcp"
+]
+
+[tool.uv.sources]
+odmcp = { workspace = true }
+
+[tool.hatch.version]
+path = "../../src/odmcp/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/odmcp_ch_sbb"]
