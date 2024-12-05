@@ -647,7 +647,7 @@ def fetch_target_actual_compared(
     Raises:
         httpx.HTTPError: If the API request fails
     """
-    endpoint = f"{BASE_URL}/catalog/datasets/ist-daten-sbb/records?limit=20"
+    endpoint = f"{BASE_URL}/catalog/datasets/ist-daten-sbb/records?limit=100"
     response = httpx.get(endpoint, params=params.model_dump(exclude_none=True))
     response.raise_for_status()
     return TargetActualComparedResponse(**response.json())
@@ -794,7 +794,7 @@ def fetch_station_furnitures(
         httpx.HTTPError: If the API request fails
     """
 
-    endpoint = f"{BASE_URL}/catalog/datasets/mobiliar-im-bahnhof/records?limit=20"
+    endpoint = f"{BASE_URL}/catalog/datasets/mobiliar-im-bahnhof/records?limit=100"
     response = httpx.get(endpoint, params=params.model_dump(exclude_none=True))
     response.raise_for_status()
     return StationFurnitureResponse(**response.json())
@@ -967,7 +967,9 @@ def fetch_station_services(params: StationServiceParams) -> StationServiceRespon
     Raises:
         httpx.HTTPError: If the API request fails
     """
-    endpoint = f"{BASE_URL}/catalog/datasets/haltestelle-offnungszeiten/records"
+    endpoint = (
+        f"{BASE_URL}/catalog/datasets/haltestelle-offnungszeiten/records?limit=100"
+    )
     response = httpx.get(endpoint, params=params.model_dump(exclude_none=True))
     response.raise_for_status()
     return StationServiceResponse(**response.json())
@@ -1055,7 +1057,70 @@ class StoresParams(BaseModel):
         default=False, description="Include application metadata"
     )
 
+    """Cant get this working even tho its mapping what it returns....
 
+    Returns:
+       
+    """
+
+
+class InfoText(BaseModel):
+    de: Optional[str] = Field(description="Information text in German")
+    en: Optional[str] = Field(description="Information text in English")
+    fr: Optional[str] = Field(description="Information text in French")
+    it: Optional[str] = Field(description="Information text in Italian")
+
+
+class ContactItem(BaseModel):
+    type: str = Field(description="Type of contact information, e.g., 'phone'")
+    value: str = Field(
+        description="The value of the contact, e.g., phone number or email address"
+    )
+    access: str = Field(description="Access level for the contact, e.g., 'public'")
+    lang: Optional[str] = Field(
+        default=None, description="Language of the contact information, if applicable"
+    )
+    info_text: Optional[InfoText] = Field(
+        default=None, description="Localized information texts for the contact"
+    )
+
+
+class OpeningHours(BaseModel):
+    day_from: int = Field(description="Starting day of the week (0=Monday, 6=Sunday)")
+    day_to: int = Field(description="Ending day of the week (0=Monday, 6=Sunday)")
+    time_from: str = Field(description="Opening time in HH:MM:SS format")
+    time_to: str = Field(description="Closing time in HH:MM:SS format")
+
+
+class Holiday(BaseModel):
+    date: str = Field(description="Date of the holiday in YYYY-MM-DD format")
+    name_de: Optional[str] = Field(description="Holiday name in German")
+    name_en: Optional[str] = Field(description="Holiday name in English")
+    name_fr: Optional[str] = Field(description="Holiday name in French")
+    name_it: Optional[str] = Field(description="Holiday name in Italian")
+    holiday_type: Optional[str] = Field(
+        description="Type of holiday (e.g., national, regional)"
+    )
+
+
+class ScheduleItem(BaseModel):
+    valid_from: str = Field(
+        description="Date from which the schedule is valid in YYYY-MM-DD format"
+    )
+    valid_until: Optional[str] = Field(
+        description="Date until which the schedule is valid in YYYY-MM-DD format"
+    )
+    openinghours: List[OpeningHours] = Field(
+        description="List of opening hours for the schedule"
+    )
+    holiday: Optional[Any] = Field(description="Holiday information, if applicable")
+
+
+class Schedule(BaseModel):
+    schedule: dict[Any, List[ScheduleItem]]
+
+
+##cant get the mapping to work
 class StoresResult(BaseModel):
     station_uic: Optional[int] = Field(default=None, description="Station UIC code")
     category: Optional[str] = Field(
@@ -1139,7 +1204,7 @@ def fetch_stores_data(params: StoresParams) -> StoresResponse:
     Raises:
         httpx.HTTPError: If the API request fails
     """
-    endpoint = f"{BASE_URL}/catalog/datasets/offnungszeiten-shops/records?limit=20"
+    endpoint = f"{BASE_URL}/catalog/datasets/offnungszeiten-shops/records?limit=100"
     response = httpx.get(endpoint, params=params.model_dump(exclude_none=True))
     response.raise_for_status()
     return StoresResponse(**response.json())
@@ -1206,28 +1271,31 @@ if __name__ == "__main__":
     #    fetch_rail_traffic_info(TrafficInfoParams(select="title,description", limit=1)),
     # )
     # print(
-    #    "Railway Lines:",
-    #    fetch_railway_lines(RailwayLineParams(select="linie,linienname", limit=1)),
+    #     "Railway Lines:",
+    #     fetch_railway_lines(RailwayLineParams(select="tst", limit=1)),
     # )
     # print(
     #    "Rolling Stock:",
     #    fetch_rolling_stock(RollingStockParams(select="fahrzeug_typ,objekt", limit=1)),
     # )
+    # print(
+    #    "Usage Info",
+    #    fetch_usage_data(StationUsersParams(select="", limit=1)),
+    # )
+    # print(
+    #    "Target Actual Compared:",
+    #    fetch_target_actual_compared(TargetActualComparedParams(select="", limit=1)),
+    # )
+    #
+    # print(
+    #    "Station Info:",
+    #    fetch_station_furnitures(StationFurnitureParams(select="", limit=1)),
+    # )
+    # print(
+    #    "station services",
+    #    fetch_station_services(StationServiceParams(select="", limit=1)),
+    # )
     print(
-        "Usage Info",
-        fetch_usage_data(StationUsersParams(select="", limit=1)),
+        "getstore data ",
+        fetch_stores_data(StoresParams(select="openinghours", limit=1)),
     )
-    print(
-        "Target Actual Compared:",
-        fetch_target_actual_compared(TargetActualComparedParams(select="", limit=1)),
-    )
-
-    print(
-        "Station Info:",
-        fetch_station_furnitures(StationFurnitureParams(select="", limit=1)),
-    )
-    print(
-        "station services",
-        fetch_station_services(StationServiceParams(select="", limit=1)),
-    )
-    print("getstore data ", fetch_stores_data(StoresParams(select="", limit=1)))
