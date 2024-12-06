@@ -1,0 +1,113 @@
+{
+  "total_count": 3960,
+  "results": [
+    {
+      "station_uic": 8509258,
+      "category": "sbb_services",
+      "subcategory": "counter_sbb",
+      "description_de": null,
+      "description_fr": null,
+      "description_it": null,
+      "description_en": null,
+      "description_formatted_de": null,
+      "description_formatted_fr": null,
+      "description_formatted_it": null,
+      "description_formatted_en": null,
+      "icon_svg": "https://assets.insa.sbb.ch/media/75bd13e6db3242faa196dd9745131f26.svg",
+      "contacts": [
+        {
+          "type": "phone",
+          "value": "+41 81 854 15 10",
+          "access": "public",
+          "lang": null,
+          "info_text": null
+        },
+        {
+          "type": "email",
+          "value": "zuoz@engadin.ch",
+          "access": "public",
+          "lang": null,
+          "info_text": null
+        }
+      ],
+      "openhour_special_pdf_de": null,
+      "openhour_special_pdf_fr": null,
+      "openhour_special_pdf_it": null,
+      "openhour_special_pdf_en": null,
+      "logo_svg": "https://assets.insa.sbb.ch/media/ebeb89d6a5f948a4a37cf69d65236649.svg",
+      "businee_name": "Billette, Abonnemente, Freizeitangebote RhB",
+      "name_de": "Billette, Abonnemente, Freizeitangebote",
+      "name_fr": "Billets, abonnements et offres loisirs",
+      "name_it": "Biglietti, abbonamenti e offerte per il tempo libero",
+      "name_en": "Tickets, travelcards and leisure travel offers",
+      "additional_name": null,
+      "tags": [
+        {
+          "de": "Beratung",
+          "fr": "Conseil",
+          "it": "Consulenza",
+          "en": "Consultancy"
+        },
+        {
+          "de": "Ticket",
+          "fr": "Billet",
+          "it": "Biglietto",
+          "en": "Ticket"
+        }
+      ],
+      "openinghours": [
+        {
+          "valid_from": "2024-11-05",
+          "valid_until": "2024-12-08",
+          "openinghours": [
+            {
+              "day_from": 0,
+              "day_to": 4,
+              "time_from": "08:00:00",
+              "time_to": "12:00:00"
+            },
+            {
+              "day_from": 0,
+              "day_to": 4,
+              "time_from": "14:00:00",
+              "time_to": "18:00:00"
+            }
+          ],
+          "holiday": null
+        }
+      ],
+      "url_identifier": "pos-8509258-oU-Qotj9QFK8dpyY7edzdw",
+      "has_iabp": 0,
+      "location_details_de": "Stadtebene",
+      "location_details_fr": "Niveau ville",
+      "location_details_it": "Livello principale",
+      "location_details_en": "City level",
+      "floor": {
+        "level": 0,
+        "name": {
+          "de": "Stadtebene",
+          "fr": "Niveau ville",
+          "it": "Livello principale",
+          "en": "City level"
+        }
+      },
+      "plan_extract_svg": null,
+      "url_alias": null,
+      "geo": {
+        "lon": 9.961268129,
+        "lat": 46.600012151
+      },
+      "photo": null,
+      "extensions": null,
+      "valid_from": null,
+      "valid_until": null,
+      "short_name_de": "Billette & Abonnemente",
+      "short_name_fr": "Billets & abonnements",
+      "short_name_it": "Biglietti & abbonamenti",
+      "short_name_en": "Tickets & travelcards",
+      "language_station": "DE",
+      "display_name": "Billette & Abonnemente",
+      "bezeichnung_offiziell": "Zuoz"
+    }
+  ]
+}

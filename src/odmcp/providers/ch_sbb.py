@@ -384,6 +384,807 @@ TOOLS.append(
 )
 TOOLS_HANDLERS["rolling-stock"] = handle_rolling_stock
 
+
+class StationUsersParams(BaseModel):
+    select: Optional[str] = Field(
+        None,
+        description="Fields to select in the response. Examples: Bahnhof_Gare_Stazione for station name  ",
+    )
+    where: Optional[str] = Field(
+        None,
+        description="Filter conditions. Examples: 'linie = 100', 'bpk_anfang LIKE \"*Zürich*\"'",
+    )
+    group_by: Optional[str] = Field(
+        None,
+        description="Group railway lines by specific fields. Example: 'bpk_anfang' to group by starting station",
+    )
+    order_by: Optional[str] = Field(
+        None,
+        description="Sort stations. Example: 'Jahr' for line year order, 'Anzahl Bahnhofbenutzer DESC' for most used stations first",
+    )
+    limit: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Maximum number of traffic info entries to return (1-100)",
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Number of  entries to skip for pagination",
+    )
+    refine: Optional[str] = Field(
+        None,
+        description="Refine by specific facets. Example: 'author:SBB' to show only SBB notifications",
+    )
+    exclude: Optional[str] = Field(
+        None,
+        description="Exclude specific fields from response. Example: 'description_html' to exclude HTML formatting",
+    )
+    lang: Optional[str] = Field(
+        None,
+        description="Language code for responses (de, fr, it, en). Affects message content language",
+    )
+    include_links: bool = Field(
+        default=False, description="Include related links in response"
+    )
+    include_app_metas: bool = Field(
+        default=False, description="Include application metadata"
+    )
+
+
+class StationUsersResult(BaseModel):
+    bahnhof_gare_stazione: Optional[str] = Field(
+        default=None, description="Station name"
+    )
+    jahr: Optional[int] = Field(default=None, description="Year of the traffic info")
+    anzahl_bahnhofbenutzer: Optional[int] = Field(
+        default=None, description="Users of the station"
+    )
+
+
+class StationUsersResponse(BaseModel):
+    """Complete response from the endpoint."""
+
+    total_count: int = Field(description="Total number of results available")
+    results: List[StationUsersResult] = Field(description="List of traffic info items")
+
+
+# 2. Data Fetching Function
+def fetch_usage_data(params: StationUsersParams) -> StationUsersResponse:
+    """
+    Fetch data from the endpoint.
+
+    Args:
+        params: EndpointParams object containing all query parameters
+
+    Returns:
+        EndpointResponse object containing the results
+
+    Raises:
+        httpx.HTTPError: If the API request fails
+    """
+    endpoint = (
+        f"{BASE_URL}/catalog/datasets/anzahl-sbb-bahnhofbenutzer/records?limit=100"
+    )
+    response = httpx.get(endpoint, params=params.model_dump(exclude_none=True))
+    response.raise_for_status()
+    return StationUsersResponse(**response.json())
+
+
+# 3. Handler Function
+async def handle_station_users(
+    arguments: dict[str, Any] | None = None,
+) -> Sequence[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+    """
+    Handle the tool execution for this endpoint.
+
+    Args:
+        arguments: Dictionary of tool arguments
+
+    Returns:
+        Sequence of content objects
+
+    Raises:
+        Exception: If the handling fails
+    """
+    try:
+        response = fetch_usage_data(StationUsersParams(**(arguments or {})))
+        return [types.TextContent(type="text", text=str(response))]
+    except Exception as e:
+        log.error(f"Error handling endpoint: {e}")
+        raise
+
+
+# 4. Tool Registration
+TOOLS.append(
+    types.Tool(
+        name="station-users",
+        description="Description of what this endpoint does",
+        inputSchema=StationUsersParams.model_json_schema(),
+    )
+)
+TOOLS_HANDLERS["station-users"] = handle_station_users
+
+
+class TargetActualComparedParams(BaseModel):
+    select: Optional[str] = Field(
+        None,
+        description="Fields to select in the response. Examples: Bahnhof_Gare_Stazione for station name  ",
+    )
+    where: Optional[str] = Field(
+        None,
+        description="Filter conditions. Examples: 'linie = 100', 'bpk_anfang LIKE \"*Zürich*\"'",
+    )
+    group_by: Optional[str] = Field(
+        None,
+        description="Group railway lines by specific fields. Example: 'bpk_anfang' to group by starting station",
+    )
+    order_by: Optional[str] = Field(
+        None,
+        description="Sort stations. Example: 'Jahr' for line year order, 'Anzahl Bahnhofbenutzer DESC' for most used stations first",
+    )
+    limit: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Maximum number of traffic info entries to return (1-100)",
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Number of  entries to skip for pagination",
+    )
+    refine: Optional[str] = Field(
+        None,
+        description="Refine by specific facets. Example: 'author:SBB' to show only SBB notifications",
+    )
+    exclude: Optional[str] = Field(
+        None,
+        description="Exclude specific fields from response. Example: 'description_html' to exclude HTML formatting",
+    )
+    lang: Optional[str] = Field(
+        None,
+        description="Language code for responses (de, fr, it, en). Affects message content language",
+    )
+    include_links: bool = Field(
+        default=False, description="Include related links in response"
+    )
+    include_app_metas: bool = Field(
+        default=False, description="Include application metadata"
+    )
+
+
+class TargetActualComparedResult(BaseModel):
+    betriebstag: Optional[str] = Field(
+        default=None, description="Operation day in YYYY-MM-DD format"
+    )
+    fahrt_bezeichner: Optional[str] = Field(
+        default=None, description="Journey identifier"
+    )
+    betreiber_id: Optional[str] = Field(default=None, description="Operator ID")
+    betreiber_abk: Optional[str] = Field(
+        default=None, description="Operator abbreviation"
+    )
+    betreiber_name: Optional[str] = Field(
+        default=None, description="Operator full name"
+    )
+    produkt_id: Optional[str] = Field(
+        default=None, description="Product type, e.g., train (Zug)"
+    )
+    linien_id: Optional[int] = Field(default=None, description="Line ID")
+    linien_text: Optional[str] = Field(default=None, description="Line text, e.g., S3")
+    umlauf_id: Optional[str] = Field(
+        default=None, description="Circle ID (if applicable)"
+    )
+    verkehrsmittel_text: Optional[str] = Field(
+        default=None, description="Mode of transport, e.g., train type"
+    )
+    zusatzfahrt_tf: Optional[bool] = Field(
+        default=None, description="Indicates if it's an additional trip"
+    )
+    faellt_aus_tf: Optional[bool] = Field(
+        default=None, description="Indicates if the trip is canceled"
+    )
+    bpuic: Optional[int] = Field(default=None, description="Station BPUIC code")
+    haltestellen_name: Optional[str] = Field(default=None, description="Station name")
+    ankunftszeit: Optional[str] = Field(
+        default=None, description="Scheduled arrival time"
+    )
+    an_prognose: Optional[str] = Field(
+        default=None, description="Predicted arrival time"
+    )
+    an_prognose_status: Optional[str] = Field(
+        default=None, description="Status of the arrival prediction"
+    )
+    abfahrtszeit: Optional[str] = Field(
+        default=None, description="Scheduled departure time"
+    )
+    ab_prognose: Optional[str] = Field(
+        default=None, description="Predicted departure time"
+    )
+    ab_prognose_status: Optional[str] = Field(
+        default=None, description="Status of the departure prediction"
+    )
+    durchfahrt_tf: Optional[bool] = Field(
+        default=None, description="Indicates if it's a pass-through without stop"
+    )
+    ankunftsverspatung: Optional[bool] = Field(
+        default=None, description="Indicates if there is an arrival delay"
+    )
+    abfahrtsverspatung: Optional[bool] = Field(
+        default=None, description="Indicates if there is a departure delay"
+    )
+    geopos: Optional[GeoPoint2D] = Field(
+        default=None,
+        description="Geographical position as a dictionary with 'lon' and 'lat'",
+    )
+    lod: Optional[str] = Field(default=None, description="Linked Open Data (LOD) URL")
+
+
+class TargetActualComparedResponse(BaseModel):
+    """Complete response from the endpoint."""
+
+    total_count: int = Field(description="Total number of results available")
+    results: List[TargetActualComparedResult] = Field(
+        ..., description="List of results"
+    )
+
+
+# 2. Data Fetching Function
+def fetch_target_actual_compared(
+    params: TargetActualComparedParams,
+) -> TargetActualComparedResponse:
+    """
+    Fetch data from the endpoint.
+
+    Args:
+        params: EndpointParams object containing all query parameters
+
+    Returns:
+        EndpointResponse object containing the results
+
+    Raises:
+        httpx.HTTPError: If the API request fails
+    """
+    endpoint = f"{BASE_URL}/catalog/datasets/ist-daten-sbb/records?limit=100"
+    response = httpx.get(endpoint, params=params.model_dump(exclude_none=True))
+    response.raise_for_status()
+    return TargetActualComparedResponse(**response.json())
+
+
+# 3. Handler Function
+async def handle_target_actual_compared(
+    arguments: dict[str, Any] | None = None,
+) -> Sequence[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+    """
+    Handle the tool execution for this endpoint.
+
+    Args:
+        arguments: Dictionary of tool arguments
+
+    Returns:
+        Sequence of content objects
+
+    Raises:
+        Exception: If the handling fails
+    """
+    try:
+        response = fetch_target_actual_compared(
+            TargetActualComparedParams(**(arguments or {}))
+        )
+        return [types.TextContent(type="text", text=str(response))]
+    except Exception as e:
+        log.error(f"Error handling endpoint: {e}")
+        raise
+
+
+# 4. Tool Registration
+TOOLS.append(
+    types.Tool(
+        name="target-actual-compared",
+        description="Description of what this endpoint does",
+        inputSchema=TargetActualComparedParams.model_json_schema(),
+    )
+)
+TOOLS_HANDLERS["target-actual-compared"] = handle_target_actual_compared
+
+
+class StationFurnitureParams(BaseModel):
+    select: Optional[str] = Field(
+        None,
+        description="Fields to select in the response. Examples: 'bezeichnung', 'bezeichnung_offiziell'",
+    )
+    where: Optional[str] = Field(
+        None,
+        description="Filter conditions. Examples: 'we = \"50001\"', 'bpuic = 8502113'",
+    )
+    group_by: Optional[str] = Field(
+        None,
+        description="Group results by specific fields. Example: 'bezeichnung' to group by the object name",
+    )
+    order_by: Optional[str] = Field(
+        None,
+        description="Sort stations. Example: 'flame2 DESC' for highest attribute value first",
+    )
+    limit: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Maximum number of results to return (1-100)",
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Number of entries to skip for pagination",
+    )
+    refine: Optional[str] = Field(
+        None,
+        description="Refine by specific fields. Example: 'lod:http://lod.opentransportdata.swiss/didok/8502113'",
+    )
+    exclude: Optional[str] = Field(
+        None,
+        description="Exclude specific fields from response. Example: 'geopos' to exclude location data",
+    )
+    lang: Optional[str] = Field(
+        None,
+        description="Language code for responses (de, fr, it, en). Affects returned content language",
+    )
+    include_links: bool = Field(
+        default=False, description="Include related links in response"
+    )
+    include_app_metas: bool = Field(
+        default=False, description="Include application metadata"
+    )
+
+
+class StationFurnitureResult(BaseModel):
+    we: Optional[str] = Field(
+        default=None, description="Unique identifier, e.g., the station code"
+    )
+    didok: Optional[int] = Field(
+        default=None, description="DIDOK number (Swiss transport identifier)"
+    )
+    bezeichnung: Optional[str] = Field(
+        default=None, description="Name or designation of the object"
+    )
+    flame2: Optional[float] = Field(
+        default=None, description="Measurement or attribute related to the object"
+    )
+    einheit: Optional[str] = Field(
+        default=None, description="Unit of measurement for the attribute"
+    )
+    bezeichnung_offiziell: Optional[str] = Field(
+        default=None, description="Official designation of the location"
+    )
+    lod: Optional[str] = Field(
+        default=None, description="Linked Open Data reference URL"
+    )
+    geopos: Optional[GeoPoint2D] = Field(
+        default=None,
+        description="Geoposition as a dictionary containing longitude and latitude",
+    )
+    tu_nummer: Optional[int] = Field(default=None, description="Transport unit number")
+    bpuic: Optional[int] = Field(
+        default=None, description="BPUIC code for transport infrastructure"
+    )
+
+
+class StationFurnitureResponse(BaseModel):
+    """Complete response from the endpoint."""
+
+    total_count: int = Field(description="Total number of results available")
+    results: List[StationFurnitureResult] = Field(..., description="List of results")
+
+
+# 2. Data Fetching Function
+def fetch_station_furnitures(
+    params: StationFurnitureParams,
+) -> StationFurnitureResponse:
+    """
+    Fetch data from the endpoint.
+
+    Args:
+        params: EndpointParams object containing all query parameters
+
+    Returns:
+        EndpointResponse object containing the results
+
+    Raises:
+        httpx.HTTPError: If the API request fails
+    """
+
+    endpoint = f"{BASE_URL}/catalog/datasets/mobiliar-im-bahnhof/records?limit=100"
+    response = httpx.get(endpoint, params=params.model_dump(exclude_none=True))
+    response.raise_for_status()
+    return StationFurnitureResponse(**response.json())
+
+
+# 3. Handler Function
+async def handle_station_furnitures(
+    arguments: dict[str, Any] | None = None,
+) -> Sequence[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+    """
+    Handle the tool execution for this endpoint.
+
+    Args:
+        arguments: Dictionary of tool arguments
+
+    Returns:
+        Sequence of content objects
+
+    Raises:
+        Exception: If the handling fails
+    """
+    try:
+        response = fetch_station_furnitures(StationFurnitureParams(**(arguments or {})))
+        return [types.TextContent(type="text", text=str(response))]
+    except Exception as e:
+        log.error(f"Error handling endpoint: {e}")
+        raise
+
+
+# 4. Tool Registration
+TOOLS.append(
+    types.Tool(
+        name="station-furniture",
+        description="Description of what this endpoint does",
+        inputSchema=StationFurnitureParams.model_json_schema(),
+    )
+)
+TOOLS_HANDLERS["station-furniture"] = handle_station_furnitures
+
+
+class StationServiceParams(BaseModel):
+    select: Optional[str] = Field(
+        None,
+        description="Fields to select in the response. Examples: 'stationsbezeichnung', 'servicename'",
+    )
+    where: Optional[str] = Field(
+        None,
+        description="Filter conditions. Examples: 'dst_nr = 10', 'wochentag = \"01-01-04\"'",
+    )
+    group_by: Optional[str] = Field(
+        None,
+        description="Group results by specific fields. Example: 'feiertag' to group by holidays",
+    )
+    order_by: Optional[str] = Field(
+        None,
+        description="Sort results. Example: 'von1 ASC' for earliest service time first",
+    )
+    limit: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Maximum number of results to return (1-100)",
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Number of entries to skip for pagination",
+    )
+    refine: Optional[str] = Field(
+        None,
+        description="Refine by specific fields. Example: 'unternehmung:SBB' to show only SBB services",
+    )
+    exclude: Optional[str] = Field(
+        None,
+        description="Exclude specific fields from response. Example: 'geopos' to exclude location data",
+    )
+    lang: Optional[str] = Field(
+        None,
+        description="Language code for responses (de, fr, it, en). Affects returned content language",
+    )
+    include_links: bool = Field(
+        default=False, description="Include related links in response"
+    )
+    include_app_metas: bool = Field(
+        default=False, description="Include application metadata"
+    )
+
+
+class StationServiceResult(BaseModel):
+    dst_nr: Optional[int] = Field(default=None, description="Station service number")
+    stationsbezeichnung: Optional[str] = Field(default=None, description="Station name")
+    datum: Optional[str] = Field(default=None, description="Date of the service")
+    feiertag: Optional[str] = Field(default=None, description="Holiday name")
+    wochentag: Optional[str] = Field(
+        default=None, description="Day of the week in 'DD-MM-YY' format"
+    )
+    national: Optional[int] = Field(
+        default=None, description="Indicates if the service is national (1 = yes)"
+    )
+    servicetyp: Optional[int] = Field(
+        default=None, description="Service type identifier"
+    )
+    servicename: Optional[str] = Field(default=None, description="Name of the service")
+    closed: Optional[str] = Field(
+        default=None, description="Indicates if the service is closed (null if open)"
+    )
+    von1: Optional[str] = Field(
+        default=None, description="Service start time for the first period"
+    )
+    bis1: Optional[str] = Field(
+        default=None, description="Service end time for the first period"
+    )
+    von2: Optional[str] = Field(
+        default=None, description="Service start time for the second period"
+    )
+    bis2: Optional[str] = Field(
+        default=None, description="Service end time for the second period"
+    )
+    von3: Optional[str] = Field(
+        default=None, description="Service start time for the third period"
+    )
+    bis3: Optional[str] = Field(
+        default=None, description="Service end time for the third period"
+    )
+    unternehmung: Optional[str] = Field(
+        default=None, description="Name of the company providing the service"
+    )
+    bpuic: Optional[int] = Field(
+        default=None, description="BPUIC code for transport infrastructure"
+    )
+    bezeichnung_offiziell: Optional[str] = Field(
+        default=None, description="Official designation of the station"
+    )
+    abkuerzung: Optional[str] = Field(
+        default=None, description="Abbreviation for the station"
+    )
+    lod: Optional[str] = Field(
+        default=None, description="Linked Open Data reference URL"
+    )
+    geopos: Optional[GeoPoint2D] = Field(
+        default=None,
+        description="Geoposition as a dictionary containing longitude and latitude",
+    )
+    tu_nummer: Optional[int] = Field(default=None, description="Transport unit number")
+    meteo: Optional[str] = Field(
+        default=None, description="URL to the weather information for the station"
+    )
+    plz: Optional[str] = Field(default=None, description="Postal code of the station")
+
+
+class StationServiceResponse(BaseModel):
+    """Complete response from the endpoint."""
+
+    total_count: int = Field(description="Total number of results available")
+
+    results: List[StationServiceResult] = Field(..., description="List of results")
+
+
+# 2. Data Fetching Function
+def fetch_station_services(params: StationServiceParams) -> StationServiceResponse:
+    """
+    Fetch data from the endpoint.
+
+    Args:
+        params: EndpointParams object containing all query parameters
+
+    Returns:
+        EndpointResponse object containing the results
+
+    Raises:
+        httpx.HTTPError: If the API request fails
+    """
+    endpoint = (
+        f"{BASE_URL}/catalog/datasets/haltestelle-offnungszeiten/records?limit=100"
+    )
+    response = httpx.get(endpoint, params=params.model_dump(exclude_none=True))
+    response.raise_for_status()
+    return StationServiceResponse(**response.json())
+
+
+# 3. Handler Function
+async def handle_station_services(
+    arguments: dict[str, Any] | None = None,
+) -> Sequence[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+    """
+    Handle the tool execution for this endpoint.
+
+    Args:
+        arguments: Dictionary of tool arguments
+
+    Returns:
+        Sequence of content objects
+
+    Raises:
+        Exception: If the handling fails
+    """
+    try:
+        response = fetch_station_services(StationServiceParams(**(arguments or {})))
+        return [types.TextContent(type="text", text=str(response))]
+    except Exception as e:
+        log.error(f"Error handling endpoint: {e}")
+        raise
+
+
+# 4. Tool Registration
+TOOLS.append(
+    types.Tool(
+        name="station-services",
+        description="Description of what this endpoint does",
+        inputSchema=StationServiceParams.model_json_schema(),
+    )
+)
+TOOLS_HANDLERS["station-services"] = handle_station_services
+
+
+class StoresParams(BaseModel):
+    select: Optional[str] = Field(
+        None,
+        description="Fields to select in the response. Examples: 'station_uic', 'name_de', 'openinghours'",
+    )
+    where: Optional[str] = Field(
+        None,
+        description="Filter conditions. Examples: 'category = \"sbb_services\"', 'station_uic = 8509000'",
+    )
+    group_by: Optional[str] = Field(
+        None,
+        description="Group results by specific fields. Example: 'holiday' to group by holidays",
+    )
+    order_by: Optional[str] = Field(
+        None,
+        description="Sort results. Example: 'valid_from ASC' for earliest opening times first",
+    )
+    limit: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Maximum number of results to return (1-100)",
+    )
+    offset: int = Field(
+        default=0,
+        ge=0,
+        description="Number of entries to skip for pagination",
+    )
+    refine: Optional[str] = Field(
+        None,
+        description="Refine by specific fields. Example: 'language_station:DE' to show only German stations",
+    )
+    exclude: Optional[str] = Field(
+        None,
+        description="Exclude specific fields from response. Example: 'icon_svg' to exclude service icons",
+    )
+    lang: Optional[str] = Field(
+        None,
+        description="Language code for responses (de, fr, it, en). Affects returned content language",
+    )
+    include_links: bool = Field(
+        default=False, description="Include related links in response"
+    )
+    include_app_metas: bool = Field(
+        default=False, description="Include application metadata"
+    )
+
+    """Cant get this working even tho its mapping what it returns....
+
+    Returns:
+       
+    """
+
+
+###Complex types are returned as a string and cant be parsed so they are represented as str
+## the ones are :  contacts openinghours floor
+##todo find a way to get the mapping to work
+
+
+##cant get the mapping to work
+class StoresResult(BaseModel):
+    station_uic: Optional[int] = Field(default=None, description="Station UIC code")
+    category: Optional[str] = Field(
+        default=None, description="Main category of the service"
+    )
+    subcategory: Optional[str] = Field(
+        default=None, description="Subcategory of the service"
+    )
+    contacts: str = Field(
+        description="Contact information, including type, value, and info text in multiple languages",
+    )
+    openinghours: str = Field(
+        description="Opening hours for the service with details on validity and holidays",
+    )
+    geo: Optional[GeoPoint2D] = Field(
+        default=None,
+        description="Geoposition as a dictionary containing longitude and latitude",
+    )
+    location_details_de: Optional[str] = Field(
+        default=None, description="Location details in German"
+    )
+    location_details_fr: Optional[str] = Field(
+        default=None, description="Location details in French"
+    )
+    location_details_it: Optional[str] = Field(
+        default=None, description="Location details in Italian"
+    )
+    location_details_en: Optional[str] = Field(
+        default=None, description="Location details in English"
+    )
+
+    floor: Optional[str] = Field(
+        description="Floor details including level and names in multiple languages",
+    )
+    url_identifier: Optional[str] = Field(
+        default=None, description="Unique URL identifier for the service"
+    )
+    url_alias: Optional[str] = Field(
+        default=None, description="Alias for the service URL"
+    )
+    businee_name: Optional[str] = Field(
+        default=None, description="Business name associated with the service"
+    )
+    meteo: Optional[str] = Field(
+        default=None, description="URL to the weather information for the station"
+    )
+    bezeichnung_offiziell: Optional[str] = Field(
+        default=None, description="Official designation of the station"
+    )
+    display_name: Optional[str] = Field(
+        default=None, description="Display name of the service"
+    )
+
+
+class StoresResponse(BaseModel):
+    """Complete response from the endpoint."""
+
+    total_count: int = Field(description="Total number of results available")
+    results: List[StoresResult] = Field(..., description="List of results")
+
+
+# 2. Data Fetching Function
+def fetch_stores_data(params: StoresParams) -> StoresResponse:
+    """
+    Fetch data from the endpoint.
+
+    Args:
+        params: EndpointParams object containing all query parameters
+
+    Returns:
+        EndpointResponse object containing the results
+
+    Raises:
+        httpx.HTTPError: If the API request fails
+    """
+    endpoint = f"{BASE_URL}/catalog/datasets/offnungszeiten-shops/records?limit=100"
+    response = httpx.get(endpoint, params=params.model_dump(exclude_none=True))
+    print(response.json())
+    response.raise_for_status()
+    return StoresResponse(**response.json())
+
+
+# 3. Handler Function
+async def hande_stores_data(
+    arguments: dict[str, Any] | None = None,
+) -> Sequence[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+    """
+    Handle the tool execution for this endpoint.
+
+    Args:
+        arguments: Dictionary of tool arguments
+
+    Returns:
+        Sequence of content objects
+
+    Raises:
+        Exception: If the handling fails
+    """
+    try:
+        response = fetch_stores_data(StoresParams(**(arguments or {})))
+        return [types.TextContent(type="text", text=str(response))]
+    except Exception as e:
+        log.error(f"Error handling endpoint: {e}")
+        raise
+
+
+# 4. Tool Registration
+TOOLS.append(
+    types.Tool(
+        name="station-stores",
+        description="Description of what this endpoint does",
+        inputSchema=StoresParams.model_json_schema(),
+    )
+)
+TOOLS_HANDLERS["station-stores"] = hande_stores_data
 ###################
 # Other Endpoint Name
 ###################
@@ -407,15 +1208,36 @@ if __name__ == "__main__":
     # anyio.run(main)
 
     # test the endpoints
+    # print(
+    #    "Rail Traffic Info:",
+    #    fetch_rail_traffic_info(TrafficInfoParams(select="title,description", limit=1)),
+    # )
+    # print(
+    #     "Railway Lines:",
+    #     fetch_railway_lines(RailwayLineParams(select="tst", limit=1)),
+    # )
+    # print(
+    #    "Rolling Stock:",
+    #    fetch_rolling_stock(RollingStockParams(select="fahrzeug_typ,objekt", limit=1)),
+    # )
+    # print(
+    #    "Usage Info",
+    #    fetch_usage_data(StationUsersParams(select="", limit=1)),
+    # )
+    # print(
+    #    "Target Actual Compared:",
+    #    fetch_target_actual_compared(TargetActualComparedParams(select="", limit=1)),
+    # )
+    #
+    # print(
+    #    "Station Info:",
+    #    fetch_station_furnitures(StationFurnitureParams(select="", limit=1)),
+    # )
+    # print(
+    #    "station services",
+    #    fetch_station_services(StationServiceParams(select="", limit=1)),
+    # )
     print(
-        "Rail Traffic Info:",
-        fetch_rail_traffic_info(TrafficInfoParams(select="title,description", limit=1)),
-    )
-    print(
-        "Railway Lines:",
-        fetch_railway_lines(RailwayLineParams(select="linie,linienname", limit=1)),
-    )
-    print(
-        "Rolling Stock:",
-        fetch_rolling_stock(RollingStockParams(select="fahrzeug_typ,objekt", limit=1)),
+        "getstore data ",
+        fetch_stores_data(StoresParams(select="", limit=1)),
     )
