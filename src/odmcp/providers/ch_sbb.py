@@ -1064,60 +1064,9 @@ class StoresParams(BaseModel):
     """
 
 
-class InfoText(BaseModel):
-    de: Optional[str] = Field(description="Information text in German")
-    en: Optional[str] = Field(description="Information text in English")
-    fr: Optional[str] = Field(description="Information text in French")
-    it: Optional[str] = Field(description="Information text in Italian")
-
-
-class ContactItem(BaseModel):
-    type: str = Field(description="Type of contact information, e.g., 'phone'")
-    value: str = Field(
-        description="The value of the contact, e.g., phone number or email address"
-    )
-    access: str = Field(description="Access level for the contact, e.g., 'public'")
-    lang: Optional[str] = Field(
-        default=None, description="Language of the contact information, if applicable"
-    )
-    info_text: Optional[InfoText] = Field(
-        default=None, description="Localized information texts for the contact"
-    )
-
-
-class OpeningHours(BaseModel):
-    day_from: int = Field(description="Starting day of the week (0=Monday, 6=Sunday)")
-    day_to: int = Field(description="Ending day of the week (0=Monday, 6=Sunday)")
-    time_from: str = Field(description="Opening time in HH:MM:SS format")
-    time_to: str = Field(description="Closing time in HH:MM:SS format")
-
-
-class Holiday(BaseModel):
-    date: str = Field(description="Date of the holiday in YYYY-MM-DD format")
-    name_de: Optional[str] = Field(description="Holiday name in German")
-    name_en: Optional[str] = Field(description="Holiday name in English")
-    name_fr: Optional[str] = Field(description="Holiday name in French")
-    name_it: Optional[str] = Field(description="Holiday name in Italian")
-    holiday_type: Optional[str] = Field(
-        description="Type of holiday (e.g., national, regional)"
-    )
-
-
-class ScheduleItem(BaseModel):
-    valid_from: str = Field(
-        description="Date from which the schedule is valid in YYYY-MM-DD format"
-    )
-    valid_until: Optional[str] = Field(
-        description="Date until which the schedule is valid in YYYY-MM-DD format"
-    )
-    openinghours: List[OpeningHours] = Field(
-        description="List of opening hours for the schedule"
-    )
-    holiday: Optional[Any] = Field(description="Holiday information, if applicable")
-
-
-class Schedule(BaseModel):
-    schedule: dict[Any, List[ScheduleItem]]
+###Complex types are returned as a string and cant be parsed so they are represented as str
+## the ones are :  contacts openinghours floor
+##todo find a way to get the mapping to work
 
 
 ##cant get the mapping to work
@@ -1129,17 +1078,10 @@ class StoresResult(BaseModel):
     subcategory: Optional[str] = Field(
         default=None, description="Subcategory of the service"
     )
-    name_de: Optional[str] = Field(default=None, description="Service name in German")
-    name_fr: Optional[str] = Field(default=None, description="Service name in French")
-    name_it: Optional[str] = Field(default=None, description="Service name in Italian")
-    name_en: Optional[str] = Field(default=None, description="Service name in English")
-    icon_svg: Optional[str] = Field(default=None, description="URL to the service icon")
-    contacts: Optional[Any] = Field(
-        default=None,
+    contacts: str = Field(
         description="Contact information, including type, value, and info text in multiple languages",
     )
-    openinghours: Optional[Any] = Field(
-        default=None,
+    openinghours: str = Field(
         description="Opening hours for the service with details on validity and holidays",
     )
     geo: Optional[GeoPoint2D] = Field(
@@ -1159,8 +1101,7 @@ class StoresResult(BaseModel):
         default=None, description="Location details in English"
     )
 
-    floor: Optional[Any] = Field(
-        default=None,
+    floor: Optional[str] = Field(
         description="Floor details including level and names in multiple languages",
     )
     url_identifier: Optional[str] = Field(
@@ -1206,6 +1147,7 @@ def fetch_stores_data(params: StoresParams) -> StoresResponse:
     """
     endpoint = f"{BASE_URL}/catalog/datasets/offnungszeiten-shops/records?limit=100"
     response = httpx.get(endpoint, params=params.model_dump(exclude_none=True))
+    print(response.json())
     response.raise_for_status()
     return StoresResponse(**response.json())
 
@@ -1297,5 +1239,5 @@ if __name__ == "__main__":
     # )
     print(
         "getstore data ",
-        fetch_stores_data(StoresParams(select="openinghours", limit=1)),
+        fetch_stores_data(StoresParams(select="", limit=1)),
     )
