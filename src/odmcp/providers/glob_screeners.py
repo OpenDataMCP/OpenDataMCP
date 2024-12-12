@@ -314,12 +314,12 @@ async def handle_screenerdata(
 # 4. Tool Registration
 TOOLS.append(
     types.Tool(
-        name="stock-screendata",
+        name="stock_screenerdata",
         description="Description of what this endpoint does",
         inputSchema=FincanceScreenerParams.model_json_schema(),
     )
 )
-TOOLS_HANDLERS["stock-screendata"] = handle_screenerdata
+TOOLS_HANDLERS["stock_screenerdata"] = handle_screenerdata
 
 
 async def main():
