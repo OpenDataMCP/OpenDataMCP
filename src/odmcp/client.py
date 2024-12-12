@@ -9,7 +9,7 @@ from mcp.client.stdio import stdio_client
 
 log = logging.getLogger(__name__)
 
-PROVIDER = "ch_sbb"
+PROVIDER = "glob_screeners"
 
 # Create server parameters for stdio connection
 server_params = StdioServerParameters(

@@ -22,6 +22,8 @@ Usage:
 import logging
 from typing import Any, List, Optional, Sequence
 import yfinance as yf
+from mcp.server import stdio_server
+
 import mcp.types as types
 from pydantic import BaseModel, Field
 
@@ -320,10 +322,18 @@ TOOLS.append(
 TOOLS_HANDLERS["stock-screendata"] = handle_screenerdata
 
 
-###################
-# [Another Endpoint Name]
-###################
-...
+async def main():
+    from odmcp.utils import create_mcp_server
+
+    # create the server
+    server = create_mcp_server(
+        "data.glob.finance", RESOURCES, RESOURCES_HANDLERS, TOOLS, TOOLS_HANDLERS
+    )
+
+    # run the server
+    async with stdio_server() as streams:
+        await server.run(streams[0], streams[1], server.create_initialization_options())
+
 
 # Server initialization (if module is run directly)
 if __name__ == "__main__":
